@@ -1,224 +1,202 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Casino Risk Assistant</title>
-  <meta name="theme-color" content="#0b1020" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Risk Assistant" />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#090f1f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Crash Lab">
+  <title>Crash Fairness Lab</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="hero">
     <div>
-      <p class="eyebrow">مساعد إدارة المخاطر</p>
-      <h1>Casino Risk Assistant 🤖</h1>
+      <p class="eyebrow">مختبر تعليمي للتشفير والعدالة</p>
+      <h1>Crash Fairness Lab 🤖</h1>
       <p class="subtitle">
-        أداة تعليمية لمتابعة الميزانية، حساب الربح والخسارة، وفهم المخاطر.
-        لا تنفّذ رهانات ولا تضمن أي أرباح.
+        تعلّم كيف تعمل Server Seed وClient Seed وNonce وHMAC‑SHA256،
+        وتحقق من الجولات بعد كشف البذرة.
       </p>
     </div>
-    <button id="resetAll" class="danger ghost">مسح جميع البيانات</button>
   </header>
 
   <main class="container">
-    <section class="warning">
-      <strong>تنبيه مهم:</strong>
-      ألعاب الكازينو مصممة بأفضلية للمنصة على المدى الطويل. استخدم هذه الأداة للوعي المالي وتقليل الضرر فقط.
+    <section class="notice">
+      <strong>مهم:</strong>
+      هذا التطبيق لا يتنبأ بالجولة القادمة، ولا يعطي إشارات دخول أو خروج.
+      وظيفته تعليمية والتحقق من البيانات بعد توفرها.
     </section>
 
+    <section class="tabs">
+      <button class="tab active" data-tab="commitment">التحقق من البذرة</button>
+      <button class="tab" data-tab="hmac">مولّد HMAC</button>
+      <button class="tab" data-tab="sequence">تجربة Nonce</button>
+      <button class="tab" data-tab="learn">الشرح</button>
+    </section>
 
-    <section id="installPanel" class="panel install-panel">
-      <h2>تثبيت التطبيق على الجوال</h2>
-      <p class="muted">بعد رفع الموقع على GitHub Pages، يمكنك تثبيته مثل أي تطبيق وفتحه من الشاشة الرئيسية.</p>
-      <button id="installApp" class="primary" style="display:none">تثبيت التطبيق</button>
-      <p id="iosInstallHint" class="muted" style="display:none">
-        على الآيفون: افتح الموقع في Safari، ثم اضغط زر المشاركة، وبعدها اختر «إضافة إلى الشاشة الرئيسية».
+    <section id="commitment" class="tab-panel active panel">
+      <h2>1) التحقق من التزام Server Seed</h2>
+      <p class="muted">
+        أدخل Server Seed بعد كشفه، ثم ألصق الـSHA‑256 Hash الذي كان ظاهرًا قبل الجولة.
+        التطبيق يحسب الهاش ويتأكد هل يطابق الالتزام السابق.
       </p>
-    </section>
 
-    <section class="stats-grid">
-      <article class="stat-card">
-        <span>إجمالي الإيداعات</span>
-        <strong id="totalDeposits">0 ر.س</strong>
-      </article>
-      <article class="stat-card">
-        <span>إجمالي السحوبات</span>
-        <strong id="totalWithdrawals">0 ر.س</strong>
-      </article>
-      <article class="stat-card">
-        <span>صافي النتيجة</span>
-        <strong id="netResult">0 ر.س</strong>
-      </article>
-      <article class="stat-card">
-        <span>عدد الجلسات</span>
-        <strong id="sessionsCount">0</strong>
-      </article>
-    </section>
+      <label>
+        Server Seed المكشوف
+        <textarea id="revealedSeed" rows="3" placeholder="ألصق Server Seed بعد كشفه"></textarea>
+      </label>
 
-    <section class="grid two">
-      <article class="panel">
-        <h2>إضافة جلسة</h2>
-        <form id="sessionForm">
-          <label>
-            التاريخ
-            <input type="date" id="sessionDate" required />
-          </label>
-          <label>
-            الإيداع (ر.س)
-            <input type="number" id="deposit" min="0" step="0.01" value="0" required />
-          </label>
-          <label>
-            السحب (ر.س)
-            <input type="number" id="withdrawal" min="0" step="0.01" value="0" required />
-          </label>
-          <label>
-            مدة الجلسة بالدقائق
-            <input type="number" id="duration" min="0" step="1" value="0" />
-          </label>
-          <label>
-            ملاحظات
-            <textarea id="notes" rows="3" placeholder="مثال: توقفت عند حد الخسارة"></textarea>
-          </label>
-          <button type="submit" class="primary">حفظ الجلسة</button>
-        </form>
-      </article>
+      <label>
+        الهاش السابق (SHA‑256)
+        <textarea id="expectedHash" rows="2" placeholder="64 حرفًا بنظام hex"></textarea>
+      </label>
 
-      <article class="panel">
-        <h2>حدود الأمان</h2>
-        <div class="form-stack">
-          <label>
-            الميزانية المخصصة فقط (ر.س)
-            <input type="number" id="bankroll" min="0" step="0.01" value="1000" />
-          </label>
-          <label>
-            حد الخسارة اليومي (ر.س)
-            <input type="number" id="stopLoss" min="0" step="0.01" value="100" />
-          </label>
-          <label>
-            حد الوقت بالدقائق
-            <input type="number" id="timeLimit" min="0" step="1" value="60" />
-          </label>
-          <button id="saveLimits" class="secondary">حفظ الحدود</button>
-          <div id="limitStatus" class="status neutral">لم يتم تجاوز الحدود.</div>
-        </div>
-      </article>
-    </section>
+      <button id="verifyCommitment" class="primary">تحقق من التطابق</button>
 
-    <section class="grid two">
-      <article class="panel">
-        <h2>حاسبة القيمة المتوقعة</h2>
-        <p class="muted">توضح متوسط النتيجة الحسابية، ولا تتنبأ بما سيحدث في جلسة واحدة.</p>
-        <div class="form-stack">
-          <label>
-            مبلغ الرهان الافتراضي (ر.س)
-            <input type="number" id="betAmount" min="0" step="0.01" value="100" />
-          </label>
-          <label>
-            احتمال الفوز (%)
-            <input type="number" id="winProbability" min="0" max="100" step="0.01" value="48" />
-          </label>
-          <label>
-            الربح الصافي عند الفوز (ر.س)
-            <input type="number" id="winProfit" min="0" step="0.01" value="100" />
-          </label>
-          <button id="calculateEV" class="secondary">احسب</button>
-          <div id="evResult" class="result-box">القيمة المتوقعة: —</div>
-        </div>
-      </article>
-
-      <article class="panel">
-        <h2>فحص منصة مشبوهة</h2>
-        <div id="scamChecklist" class="checklist">
-          <label><input type="checkbox" value="2" /> تعدك بأرباح مضمونة</label>
-          <label><input type="checkbox" value="2" /> تطلب إيداعًا إضافيًا قبل السحب</label>
-          <label><input type="checkbox" value="2" /> لا تعرض ترخيصًا يمكن التحقق منه</label>
-          <label><input type="checkbox" value="1" /> خدمة العملاء تضغط عليك بسرعة</label>
-          <label><input type="checkbox" value="1" /> تطلب تحويلًا لعملة رقمية فقط</label>
-          <label><input type="checkbox" value="2" /> الحساب أو الرابط يتغير باستمرار</label>
-        </div>
-        <button id="checkRisk" class="secondary">احسب درجة الخطر</button>
-        <div id="riskResult" class="result-box">درجة الخطر: —</div>
-      </article>
-    </section>
-
-    <section class="panel">
-      <div class="section-head">
-        <h2>سجل الجلسات</h2>
-        <button id="exportCsv" class="secondary small">تصدير CSV</button>
+      <div class="output">
+        <span>الهاش المحسوب:</span>
+        <code id="calculatedHash">—</code>
       </div>
+      <div id="commitmentResult" class="result neutral">أدخل البيانات ثم اضغط تحقق.</div>
+    </section>
+
+    <section id="hmac" class="tab-panel panel">
+      <h2>2) توليد HMAC‑SHA256</h2>
+      <p class="muted">
+        وفق آلية التوليد المعلنة، يكون Server Seed هو مفتاح HMAC،
+        والرسالة بالشكل: ClientSeed:Nonce:Round.
+      </p>
+
+      <label>
+        Server Seed
+        <textarea id="serverSeed" rows="3" placeholder="Server Seed المكشوف"></textarea>
+      </label>
+
+      <label>
+        Client Seed
+        <input id="clientSeed" type="text" placeholder="Client Seed">
+      </label>
+
+      <div class="grid-2">
+        <label>
+          Nonce
+          <input id="nonce" type="number" min="0" step="1" value="0">
+        </label>
+        <label>
+          Round / Cursor
+          <input id="round" type="number" min="0" step="1" value="0">
+        </label>
+      </div>
+
+      <button id="generateHmac" class="primary">ولّد HMAC</button>
+
+      <div class="output">
+        <span>الرسالة:</span>
+        <code id="messageOut">—</code>
+      </div>
+      <div class="output">
+        <span>HMAC‑SHA256:</span>
+        <code id="hmacOut">—</code>
+      </div>
+      <div class="output">
+        <span>أول 4 بايت:</span>
+        <code id="bytesOut">—</code>
+      </div>
+      <div class="output">
+        <span>Float تعليمي من أول 4 بايت:</span>
+        <code id="floatOut">—</code>
+      </div>
+    </section>
+
+    <section id="sequence" class="tab-panel panel">
+      <h2>3) شاهد أثر تغيير Nonce</h2>
+      <p class="muted">
+        استخدم نفس البذرتين، ثم ولّد عدة قيم متتابعة. ستلاحظ أن تغيير Nonce وحده
+        ينتج HMAC مختلفًا بالكامل.
+      </p>
+
+      <label>
+        Server Seed
+        <textarea id="seqServerSeed" rows="3" placeholder="Server Seed تعليمي أو مكشوف"></textarea>
+      </label>
+
+      <label>
+        Client Seed
+        <input id="seqClientSeed" type="text" placeholder="Client Seed">
+      </label>
+
+      <div class="grid-2">
+        <label>
+          بداية Nonce
+          <input id="startNonce" type="number" min="0" step="1" value="0">
+        </label>
+        <label>
+          عدد القيم
+          <input id="countNonce" type="number" min="1" max="100" step="1" value="10">
+        </label>
+      </div>
+
+      <button id="generateSequence" class="primary">أنشئ التسلسل</button>
+      <button id="downloadCsv" class="secondary">تنزيل النتائج CSV</button>
+
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>التاريخ</th>
-              <th>الإيداع</th>
-              <th>السحب</th>
-              <th>الصافي</th>
-              <th>المدة</th>
-              <th>ملاحظات</th>
-              <th></th>
+              <th>Nonce</th>
+              <th>أول 12 حرفًا من HMAC</th>
+              <th>Float تعليمي</th>
             </tr>
           </thead>
-          <tbody id="sessionsTable"></tbody>
+          <tbody id="sequenceBody"></tbody>
         </table>
       </div>
-      <p id="emptyState" class="muted center">لا توجد جلسات محفوظة حتى الآن.</p>
     </section>
 
-    <section class="panel education">
-      <h2>قواعد حماية المال</h2>
-      <div class="rules-grid">
-        <div><strong>1</strong><span>لا تستخدم مال الإيجار أو الديون أو مصاريف الأسرة.</span></div>
-        <div><strong>2</strong><span>لا تطارد الخسارة بإيداع جديد.</span></div>
-        <div><strong>3</strong><span>توقف فورًا عند حد الخسارة أو الوقت.</span></div>
-        <div><strong>4</strong><span>السحب الحقيقي أهم من الرصيد الظاهر داخل المنصة.</span></div>
+    <section id="learn" class="tab-panel panel">
+      <h2>كيف يعمل النظام؟</h2>
+      <div class="cards">
+        <article>
+          <strong>Server Seed</strong>
+          <p>قيمة سرية يولدها الخادم، ويُنشر Hash لها مسبقًا لمنع تغييرها لاحقًا.</p>
+        </article>
+        <article>
+          <strong>Client Seed</strong>
+          <p>قيمة يملكها المستخدم وتشارك في التوليد، لذلك لا يعتمد الناتج على الخادم وحده.</p>
+        </article>
+        <article>
+          <strong>Nonce</strong>
+          <p>رقم يزداد مع كل رهان. حتى مع ثبات البذرتين، تغييره ينتج ناتجًا جديدًا.</p>
+        </article>
+        <article>
+          <strong>HMAC‑SHA256</strong>
+          <p>دالة تشفير تنتج 32 بايت. تُحوّل بعض هذه البايتات لاحقًا إلى أحداث اللعبة.</p>
+        </article>
       </div>
+
+      <div class="explain-box">
+        <h3>لماذا لا يظهر الرقم القادم؟</h3>
+        <p>
+          قبل كشف Server Seed، لا تملك المفتاح الكامل اللازم لإعادة الحساب.
+          بعد كشفه يمكنك التحقق من أن الهاش يطابق الالتزام السابق، ثم إعادة توليد النتائج الماضية.
+        </p>
+      </div>
+    </section>
+
+    <section class="panel install-panel">
+      <h2>تثبيت التطبيق</h2>
+      <p class="muted">
+        على الآيفون: افتح الرابط في Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية.
+      </p>
     </section>
   </main>
 
-  <footer>
-    أداة توعوية فقط — لا تقدم ضمانًا للربح ولا تنفذ أي مراهنات.
-  </footer>
+  <footer>مختبر تعليمي — لا يتصل بحسابات المقامرة ولا ينفذ رهانات.</footer>
 
   <script src="script.js"></script>
-
-  <script>
-    let deferredPrompt;
-    const installButton = document.getElementById("installApp");
-    const iosHint = document.getElementById("iosInstallHint");
-
-    window.addEventListener("beforeinstallprompt", event => {
-      event.preventDefault();
-      deferredPrompt = event;
-      installButton.style.display = "inline-block";
-    });
-
-    installButton.addEventListener("click", async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      installButton.style.display = "none";
-    });
-
-    const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-    const isStandalone = window.navigator.standalone === true;
-    if (isIOS && !isStandalone) {
-      iosHint.style.display = "block";
-    }
-
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js");
-      });
-    }
-  </script>
-
 </body>
 </html>
