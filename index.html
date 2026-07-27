@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#07161c">
+  <title>Billiards Duel Pro</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>🎱 Billiards Duel Pro</h1>
+      <p>نسخة تجريبية بعملات افتراضية فقط</p>
+    </div>
+    <div class="wallet">الرصيد: <b id="balance">1000</b> 🪙</div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="label">قيمة الجولة</div>
+      <div class="bet-grid">
+        <button class="bet-btn" data-bet="10">10</button>
+        <button class="bet-btn active" data-bet="25">25</button>
+        <button class="bet-btn" data-bet="50">50</button>
+        <button class="bet-btn" data-bet="100">100</button>
+      </div>
+      <div class="round-info">
+        أنت والنظام تدفعان نفس المبلغ الافتراضي، والفائز يحصل على المجموع.
+      </div>
+      <button id="newGame" class="primary">ابدأ جولة جديدة</button>
+    </section>
+
+    <section class="scoreboard">
+      <div class="score-card">
+        <span>أنت</span>
+        <strong id="playerScore">0</strong>
+      </div>
+      <div class="score-card">
+        <span>الدور</span>
+        <strong id="turn">أنت</strong>
+      </div>
+      <div class="score-card">
+        <span>النظام</span>
+        <strong id="aiScore">0</strong>
+      </div>
+    </section>
+
+    <section class="game-shell">
+      <canvas id="game" width="1000" height="560" aria-label="طاولة بلياردو"></canvas>
+      <div id="message" class="message">اضغط ابدأ جولة جديدة.</div>
+    </section>
+
+    <section class="panel instructions">
+      <h2>طريقة اللعب</h2>
+      <p>اسحب من الكرة البيضاء بعكس اتجاه الضربة، ثم ارفع إصبعك. أول من يسجل 4 كرات يفوز بالجولة.</p>
+      <p class="warning">لا يوجد إيداع أو سحب أو أموال حقيقية في هذه النسخة.</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
