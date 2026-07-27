@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#090f1f">
+  <meta name="theme-color" content="#08111f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Crash Lab">
-  <title>Crash Fairness Lab</title>
+  <meta name="apple-mobile-web-app-title" content="Crash Lab Pro">
+  <title>Crash Lab Pro</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="stylesheet" href="style.css">
@@ -15,61 +15,151 @@
 <body>
   <header class="hero">
     <div>
-      <p class="eyebrow">مختبر تعليمي للتشفير والعدالة</p>
-      <h1>Crash Fairness Lab 🤖</h1>
+      <p class="eyebrow">مختبر احترافي للتحليل والتحقق</p>
+      <h1>Crash Lab Pro 🤖</h1>
       <p class="subtitle">
-        تعلّم كيف تعمل Server Seed وClient Seed وNonce وHMAC‑SHA256،
-        وتحقق من الجولات بعد كشف البذرة.
+        تحليل الجولات السابقة، تتبع الإحصاءات، والتحقق من Provably Fair بعد كشف البيانات.
       </p>
     </div>
+    <button id="clearAll" class="danger ghost">مسح البيانات</button>
   </header>
 
   <main class="container">
     <section class="notice">
-      <strong>مهم:</strong>
-      هذا التطبيق لا يتنبأ بالجولة القادمة، ولا يعطي إشارات دخول أو خروج.
-      وظيفته تعليمية والتحقق من البيانات بعد توفرها.
+      <strong>تنبيه:</strong>
+      هذا التطبيق تعليمي وتحليلي فقط. لا يتنبأ بنتائج الجولات القادمة ولا يعطي إشارات دخول أو خروج.
+    </section>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span>عدد الجولات</span>
+        <strong id="statCount">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>المتوسط</span>
+        <strong id="statAverage">0.00x</strong>
+      </article>
+      <article class="stat-card">
+        <span>أعلى نتيجة</span>
+        <strong id="statHighest">0.00x</strong>
+      </article>
+      <article class="stat-card">
+        <span>أقل نتيجة</span>
+        <strong id="statLowest">0.00x</strong>
+      </article>
     </section>
 
     <section class="tabs">
-      <button class="tab active" data-tab="commitment">التحقق من البذرة</button>
-      <button class="tab" data-tab="hmac">مولّد HMAC</button>
-      <button class="tab" data-tab="sequence">تجربة Nonce</button>
-      <button class="tab" data-tab="learn">الشرح</button>
+      <button class="tab active" data-tab="analyzer">تحليل الجولات</button>
+      <button class="tab" data-tab="chart">الرسم البياني</button>
+      <button class="tab" data-tab="fairness">التحقق</button>
+      <button class="tab" data-tab="nonceLab">Nonce Lab</button>
+      <button class="tab" data-tab="learn">شرح النظام</button>
     </section>
 
-    <section id="commitment" class="tab-panel active panel">
-      <h2>1) التحقق من التزام Server Seed</h2>
+    <section id="analyzer" class="panel tab-panel active">
+      <div class="section-head">
+        <div>
+          <h2>إضافة نتائج الجولات السابقة</h2>
+          <p class="muted">أدخل أرقامًا مثل: 1.15, 2.40, 8.75</p>
+        </div>
+      </div>
+
+      <label>
+        نتائج الجولات
+        <textarea id="resultsInput" rows="5" placeholder="1.15, 2.40, 1.03, 5.60"></textarea>
+      </label>
+
+      <div class="button-row">
+        <button id="addResults" class="primary">إضافة النتائج</button>
+        <button id="loadExample" class="secondary">بيانات تجريبية</button>
+      </div>
+
+      <div class="mini-stats">
+        <div><span>أقل من 2x</span><strong id="under2">0%</strong></div>
+        <div><span>2x أو أكثر</span><strong id="over2">0%</strong></div>
+        <div><span>5x أو أكثر</span><strong id="over5">0%</strong></div>
+        <div><span>10x أو أكثر</span><strong id="over10">0%</strong></div>
+      </div>
+
+      <div class="panel inner">
+        <h3>آخر النتائج</h3>
+        <div id="chips" class="chips"></div>
+        <p id="emptyResults" class="muted center">لا توجد نتائج محفوظة.</p>
+      </div>
+
+      <div class="button-row">
+        <button id="exportJson" class="secondary">تصدير JSON</button>
+        <button id="exportCsv" class="secondary">تصدير CSV</button>
+        <label class="file-label">
+          استيراد JSON
+          <input id="importJson" type="file" accept=".json,application/json">
+        </label>
+      </div>
+    </section>
+
+    <section id="chart" class="panel tab-panel">
+      <h2>الرسم البياني للنتائج</h2>
+      <p class="muted">يعرض الجولات السابقة فقط، ولا يمثل توقعًا لما سيحدث لاحقًا.</p>
+
+      <div class="chart-controls">
+        <label>
+          عدد الجولات المعروضة
+          <select id="chartLimit">
+            <option value="20">آخر 20</option>
+            <option value="50" selected>آخر 50</option>
+            <option value="100">آخر 100</option>
+            <option value="500">آخر 500</option>
+          </select>
+        </label>
+        <label>
+          الحد الأعلى للرسم
+          <select id="chartCap">
+            <option value="10">10x</option>
+            <option value="25" selected>25x</option>
+            <option value="50">50x</option>
+            <option value="100">100x</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="resultsChart" width="1000" height="460"></canvas>
+      </div>
+      <div class="legend">
+        <span><i class="dot low"></i> أقل من 2x</span>
+        <span><i class="dot mid"></i> 2x إلى أقل من 10x</span>
+        <span><i class="dot high"></i> 10x أو أكثر</span>
+      </div>
+    </section>
+
+    <section id="fairness" class="panel tab-panel">
+      <h2>التحقق من Server Seed</h2>
       <p class="muted">
-        أدخل Server Seed بعد كشفه، ثم ألصق الـSHA‑256 Hash الذي كان ظاهرًا قبل الجولة.
-        التطبيق يحسب الهاش ويتأكد هل يطابق الالتزام السابق.
+        بعد كشف Server Seed، احسب SHA‑256 وقارنه بالهاش الذي كان ظاهرًا مسبقًا.
       </p>
 
       <label>
         Server Seed المكشوف
-        <textarea id="revealedSeed" rows="3" placeholder="ألصق Server Seed بعد كشفه"></textarea>
+        <textarea id="revealedSeed" rows="3" placeholder="ألصق Server Seed"></textarea>
       </label>
 
       <label>
-        الهاش السابق (SHA‑256)
+        الهاش السابق SHA‑256
         <textarea id="expectedHash" rows="2" placeholder="64 حرفًا بنظام hex"></textarea>
       </label>
 
-      <button id="verifyCommitment" class="primary">تحقق من التطابق</button>
+      <button id="verifyCommitment" class="primary">تحقق</button>
 
       <div class="output">
-        <span>الهاش المحسوب:</span>
+        <span>الهاش المحسوب</span>
         <code id="calculatedHash">—</code>
       </div>
-      <div id="commitmentResult" class="result neutral">أدخل البيانات ثم اضغط تحقق.</div>
-    </section>
+      <div id="commitmentResult" class="result neutral">أدخل البيانات واضغط تحقق.</div>
 
-    <section id="hmac" class="tab-panel panel">
-      <h2>2) توليد HMAC‑SHA256</h2>
-      <p class="muted">
-        وفق آلية التوليد المعلنة، يكون Server Seed هو مفتاح HMAC،
-        والرسالة بالشكل: ClientSeed:Nonce:Round.
-      </p>
+      <hr>
+
+      <h3>توليد HMAC‑SHA256</h3>
 
       <label>
         Server Seed
@@ -95,28 +185,27 @@
       <button id="generateHmac" class="primary">ولّد HMAC</button>
 
       <div class="output">
-        <span>الرسالة:</span>
+        <span>الرسالة</span>
         <code id="messageOut">—</code>
       </div>
       <div class="output">
-        <span>HMAC‑SHA256:</span>
+        <span>HMAC‑SHA256</span>
         <code id="hmacOut">—</code>
       </div>
       <div class="output">
-        <span>أول 4 بايت:</span>
+        <span>أول 4 بايت</span>
         <code id="bytesOut">—</code>
       </div>
       <div class="output">
-        <span>Float تعليمي من أول 4 بايت:</span>
+        <span>Float تعليمي</span>
         <code id="floatOut">—</code>
       </div>
     </section>
 
-    <section id="sequence" class="tab-panel panel">
-      <h2>3) شاهد أثر تغيير Nonce</h2>
+    <section id="nonceLab" class="panel tab-panel">
+      <h2>Nonce Lab</h2>
       <p class="muted">
-        استخدم نفس البذرتين، ثم ولّد عدة قيم متتابعة. ستلاحظ أن تغيير Nonce وحده
-        ينتج HMAC مختلفًا بالكامل.
+        شاهد كيف ينتج كل Nonce قيمة HMAC مختلفة حتى عند ثبات البذرتين.
       </p>
 
       <label>
@@ -136,20 +225,19 @@
         </label>
         <label>
           عدد القيم
-          <input id="countNonce" type="number" min="1" max="100" step="1" value="10">
+          <input id="countNonce" type="number" min="1" max="200" step="1" value="20">
         </label>
       </div>
 
-      <button id="generateSequence" class="primary">أنشئ التسلسل</button>
-      <button id="downloadCsv" class="secondary">تنزيل النتائج CSV</button>
+      <button id="generateSequence" class="primary">إنشاء التسلسل</button>
 
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
               <th>Nonce</th>
-              <th>أول 12 حرفًا من HMAC</th>
-              <th>Float تعليمي</th>
+              <th>بداية HMAC</th>
+              <th>Float</th>
             </tr>
           </thead>
           <tbody id="sequenceBody"></tbody>
@@ -157,45 +245,39 @@
       </div>
     </section>
 
-    <section id="learn" class="tab-panel panel">
-      <h2>كيف يعمل النظام؟</h2>
+    <section id="learn" class="panel tab-panel">
+      <h2>كيف يعمل Provably Fair؟</h2>
+
       <div class="cards">
         <article>
           <strong>Server Seed</strong>
-          <p>قيمة سرية يولدها الخادم، ويُنشر Hash لها مسبقًا لمنع تغييرها لاحقًا.</p>
+          <p>قيمة سرية يولدها الخادم، ويُنشر Hash لها قبل اللعب لمنع تغييرها لاحقًا.</p>
         </article>
         <article>
           <strong>Client Seed</strong>
-          <p>قيمة يملكها المستخدم وتشارك في التوليد، لذلك لا يعتمد الناتج على الخادم وحده.</p>
+          <p>قيمة يملكها المستخدم وتشارك في عملية التوليد.</p>
         </article>
         <article>
           <strong>Nonce</strong>
-          <p>رقم يزداد مع كل رهان. حتى مع ثبات البذرتين، تغييره ينتج ناتجًا جديدًا.</p>
+          <p>رقم يتغير مع كل رهان، ولذلك تنتج قيمة جديدة حتى لو بقيت البذرتان ثابتتين.</p>
         </article>
         <article>
           <strong>HMAC‑SHA256</strong>
-          <p>دالة تشفير تنتج 32 بايت. تُحوّل بعض هذه البايتات لاحقًا إلى أحداث اللعبة.</p>
+          <p>دالة تشفير تنتج 32 بايت تُستخدم في اشتقاق نتيجة اللعبة.</p>
         </article>
       </div>
 
       <div class="explain-box">
-        <h3>لماذا لا يظهر الرقم القادم؟</h3>
+        <h3>لماذا لا يمكن معرفة الجولة القادمة؟</h3>
         <p>
-          قبل كشف Server Seed، لا تملك المفتاح الكامل اللازم لإعادة الحساب.
-          بعد كشفه يمكنك التحقق من أن الهاش يطابق الالتزام السابق، ثم إعادة توليد النتائج الماضية.
+          قبل كشف Server Seed لا يكون المفتاح الكامل متوفرًا. بعد كشفه يمكن التحقق من الجولات السابقة،
+          لكن هذا لا يحول النتائج الماضية إلى وسيلة لمعرفة الجولة التالية.
         </p>
       </div>
     </section>
-
-    <section class="panel install-panel">
-      <h2>تثبيت التطبيق</h2>
-      <p class="muted">
-        على الآيفون: افتح الرابط في Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية.
-      </p>
-    </section>
   </main>
 
-  <footer>مختبر تعليمي — لا يتصل بحسابات المقامرة ولا ينفذ رهانات.</footer>
+  <footer>Crash Lab Pro — تطبيق تعليمي وتحليلي فقط.</footer>
 
   <script src="script.js"></script>
 </body>
