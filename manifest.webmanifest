@@ -1,0 +1,10 @@
+{
+  "name": "Royal 8 Ball Arena V2",
+  "short_name": "Royal 8 Ball",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#06151b",
+  "theme_color": "#07161c",
+  "description": "لعبة 8-ball أصلية بتحكم وشاشة كاملة وبوكت محسنة",
+  "icons": []
+}
