@@ -1,5 +1,5 @@
 const HOUSE_EDGE = 0.01;
-const STARTING_BALANCE = 1000;
+const STARTING_BALANCE = 1000000;
 
 const balanceEl = document.getElementById("balance");
 const betAmountEl = document.getElementById("betAmount");
