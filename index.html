@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Limbo Pro Demo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">L</div>
+        <div>
+          <h1>Limbo Pro</h1>
+          <p>نسخة محاكاة بنقاط افتراضية</p>
+        </div>
+      </div>
+
+      <div class="balance-box">
+        <span>الرصيد الافتراضي</span>
+        <strong><span id="balance">1,000,000.00</span> نقطة</strong>
+      </div>
+    </header>
+
+    <section class="game-card">
+      <div class="result-panel">
+        <div id="result" class="result">1.00×</div>
+        <div id="status" class="status">اكتب مبلغ الرهان وحدد المضاعف ثم اضغط BET</div>
+
+        <div class="recent-strip" id="recentStrip"></div>
+
+        <div class="hash-box">
+          <span>Hash الجولة</span>
+          <code id="roundHash">—</code>
+        </div>
+      </div>
+
+      <aside class="controls-panel">
+        <div class="tabs">
+          <button id="manualTab" class="active" type="button">يدوي</button>
+          <button id="autoTab" type="button">تلقائي</button>
+        </div>
+
+        <label>
+          مبلغ الرهان
+          <div class="field-row">
+            <input id="betAmount" type="number" min="0.01" step="0.01" value="100" />
+            <button id="halfBtn" type="button">½</button>
+            <button id="doubleBtn" type="button">2×</button>
+          </div>
+        </label>
+
+        <label>
+          المضاعف المستهدف
+          <input id="target" type="number" min="1.01" max="1000000" step="0.01" value="2.00" />
+        </label>
+
+        <div class="quick-targets">
+          <button data-target="1.20">1.20×</button>
+          <button data-target="1.50">1.50×</button>
+          <button data-target="2">2.00×</button>
+          <button data-target="5">5.00×</button>
+          <button data-target="10">10.00×</button>
+          <button data-target="100">100×</button>
+        </div>
+
+        <div class="stats-grid">
+          <div>
+            <span>فرصة الفوز التقريبية</span>
+            <strong id="chance">49.5000%</strong>
+          </div>
+          <div>
+            <span>صافي الربح عند الفوز</span>
+            <strong id="profit">100.00</strong>
+          </div>
+        </div>
+
+        <div id="autoControls" class="auto-controls hidden">
+          <label>
+            عدد الجولات
+            <input id="autoRounds" type="number" min="1" max="1000" step="1" value="10" />
+          </label>
+
+          <label>
+            سرعة اللعب
+            <select id="speed">
+              <option value="900">عادية</option>
+              <option value="450">سريعة</option>
+              <option value="180">سريعة جداً</option>
+            </select>
+          </label>
+
+          <div class="auto-note">يمكن إيقاف اللعب التلقائي في أي وقت.</div>
+        </div>
+
+        <button id="betBtn" class="bet-btn" type="button">BET</button>
+        <button id="stopBtn" class="stop-btn hidden" type="button">إيقاف Auto Bet</button>
+      </aside>
+    </section>
+
+    <section class="dashboard">
+      <div class="dashboard-head">
+        <h2>الإحصائيات</h2>
+        <div>
+          <button id="resetStatsBtn" type="button">تصفير الإحصائيات</button>
+          <button id="resetBalanceBtn" type="button">إعادة الرصيد</button>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div><span>الجولات</span><strong id="roundsStat">0</strong></div>
+        <div><span>الفوز</span><strong id="winsStat">0</strong></div>
+        <div><span>الخسارة</span><strong id="lossesStat">0</strong></div>
+        <div><span>صافي الربح</span><strong id="netStat">0.00</strong></div>
+        <div><span>أفضل مضاعف</span><strong id="bestStat">1.00×</strong></div>
+        <div><span>سلسلة الفوز</span><strong id="streakStat">0</strong></div>
+      </div>
+
+      <div class="history-head">
+        <h3>آخر 100 نتيجة</h3>
+      </div>
+      <div id="history" class="history"></div>
+    </section>
+
+    <p class="notice">
+      هذه نسخة محاكاة تعليمية بنقاط افتراضية فقط. لا تحتوي على إيداع أو سحب أو أموال حقيقية.
+    </p>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
