@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Limbo X</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="brand">LX</div>
+      <div class="wallet">SAR <span id="wallet">1,000,000.00</span></div>
+      <button class="wallet-btn">▣</button>
+      <button class="icon-btn">●</button>
+      <button class="icon-btn">🔔</button>
+    </header>
+
+    <main class="game-shell">
+      <section class="game-panel">
+        <div id="recentResults" class="recent-results"></div>
+
+        <div class="multiplier-area">
+          <div id="mainResult" class="main-result">1.00×</div>
+        </div>
+
+        <div class="target-card">
+          <label>
+            <span>Target Multiplier</span>
+            <div class="target-input-wrap">
+              <input id="targetInput" type="number" min="1.01" max="1000000" step="0.01" value="2.00" />
+              <button id="clearTarget" type="button">×</button>
+            </div>
+          </label>
+
+          <label>
+            <span>Win Chance</span>
+            <div class="chance-box">
+              <input id="chanceInput" type="text" value="49.50000000" readonly />
+              <b>%</b>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <section class="bet-panel">
+        <button id="betButton" class="bet-button">Bet</button>
+
+        <div class="field-header">
+          <span>Bet Amount</span>
+          <span id="coinAmount">0.00000000 DEMO</span>
+        </div>
+
+        <div class="money-row">
+          <div class="money-input">
+            <span>SAR</span>
+            <input id="betInput" type="number" min="0.01" step="0.01" value="100.00" />
+          </div>
+          <button id="halfBtn">½</button>
+          <button id="doubleBtn">2×</button>
+          <button id="maxBtn">Max</button>
+        </div>
+
+        <div class="field-header">
+          <span>Profit on Win</span>
+          <span id="profitCoin">0.00000000 DEMO</span>
+        </div>
+
+        <div class="profit-row">
+          <span>SAR</span>
+          <strong id="profitValue">100.00</strong>
+        </div>
+
+        <div class="mode-switch">
+          <button id="manualMode" class="active">Manual</button>
+          <button id="autoMode">Auto</button>
+        </div>
+
+        <div id="autoSettings" class="auto-settings hidden">
+          <label>
+            Number of Bets
+            <input id="autoCount" type="number" min="1" max="1000" value="10" />
+          </label>
+          <label>
+            Speed
+            <select id="autoSpeed">
+              <option value="900">Normal</option>
+              <option value="450">Fast</option>
+              <option value="180">Turbo</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="bottom-tools">
+        <button>⚙</button>
+        <button>📈</button>
+        <button id="fairnessBtn" class="fairness">☑ Fairness</button>
+      </section>
+    </main>
+
+    <section class="history-card">
+      <div class="history-title">
+        <h2>History</h2>
+        <button id="resetBalance">Reset Balance</button>
+      </div>
+      <div class="stats">
+        <div><span>Rounds</span><strong id="rounds">0</strong></div>
+        <div><span>Wins</span><strong id="wins">0</strong></div>
+        <div><span>Losses</span><strong id="losses">0</strong></div>
+        <div><span>Net</span><strong id="net">0.00</strong></div>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </section>
+
+    <div id="fairnessModal" class="modal hidden">
+      <div class="modal-card">
+        <button id="closeFairness" class="close">×</button>
+        <h3>Fairness</h3>
+        <p>هذا نظام تحقق تعليمي للجولات داخل النسخة التجريبية.</p>
+        <div class="hash-label">Last Round Hash</div>
+        <code id="roundHash">—</code>
+      </div>
+    </div>
+
+    <p class="notice">Demo only — virtual balance, no deposits or withdrawals.</p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

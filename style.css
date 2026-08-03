@@ -1,0 +1,108 @@
+*{box-sizing:border-box}
+:root{
+  --bg:#0f2632;
+  --header:#173444;
+  --panel:#102833;
+  --panel2:#1d3a49;
+  --panel3:#29495a;
+  --text:#fff;
+  --muted:#a9c0cc;
+  --blue:#2f82e6;
+  --green:#00e600;
+  --red:#ff4f65;
+  --border:#365666;
+}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.page{max-width:860px;margin:0 auto;min-height:100vh}
+.site-header{
+  height:92px;padding:16px 18px;display:flex;align-items:center;gap:12px;
+  background:var(--header);position:sticky;top:0;z-index:5;
+  box-shadow:0 4px 12px rgba(0,0,0,.25)
+}
+.brand{font-size:43px;font-style:italic;font-weight:900;margin-right:auto}
+.wallet{background:#102733;padding:17px 18px;border-radius:10px;font-size:19px;font-weight:700}
+.wallet-btn{background:var(--blue);border:0;color:white;padding:18px 22px;border-radius:0 10px 10px 0;font-size:20px}
+.icon-btn{border:0;background:transparent;color:white;font-size:23px}
+.game-shell{margin:24px 28px 0;border-radius:16px;overflow:hidden;background:var(--panel)}
+.game-panel{padding:38px 30px 40px}
+.recent-results{display:flex;gap:14px;overflow:hidden;margin-bottom:28px}
+.recent-chip{
+  min-width:116px;text-align:center;padding:17px 14px;border-radius:999px;
+  background:#3c596b;font-weight:800;font-size:18px
+}
+.recent-chip.win{background:var(--green);color:#073607}
+.multiplier-area{display:grid;place-items:center;height:160px}
+.main-result{font-size:78px;font-weight:500;direction:ltr;transition:.2s}
+.main-result.win{color:var(--green)}
+.main-result.lose{color:var(--red)}
+.target-card{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+  background:#234251;padding:28px;border-radius:14px
+}
+label{display:grid;gap:10px;color:var(--muted);font-size:18px}
+.target-input-wrap,.chance-box{display:flex;background:#122d39;border:2px solid var(--border);border-radius:11px;overflow:hidden}
+.target-input-wrap input,.chance-box input{
+  width:100%;padding:16px;background:transparent;border:0;color:white;font-size:21px;outline:none
+}
+.target-input-wrap button,.chance-box b{border:0;background:transparent;color:var(--muted);padding:0 16px;font-size:25px;display:grid;place-items:center}
+.bet-panel{padding:24px;background:#1c3948}
+.bet-button{
+  width:100%;padding:18px;border:0;border-radius:11px;background:var(--blue);
+  color:white;font-size:22px;font-weight:800;margin-bottom:26px
+}
+.field-header{display:flex;justify-content:space-between;color:var(--muted);font-size:17px;margin:14px 0 8px}
+.money-row{display:grid;grid-template-columns:1fr 86px 86px 100px;background:#264656;border-radius:11px;overflow:hidden}
+.money-input{display:flex;align-items:center;background:#122d39;padding-left:15px}
+.money-input span,.profit-row span{color:var(--muted);font-size:20px}
+.money-input input{width:100%;padding:16px;border:0;background:transparent;color:white;font-size:21px;outline:none}
+.money-row button{border:0;border-left:2px solid #638090;background:#426273;color:white;font-size:20px;font-weight:700}
+.profit-row{display:flex;justify-content:space-between;align-items:center;background:#224251;border:2px solid #456777;border-radius:11px;padding:17px}
+.profit-row strong{font-size:21px}
+.mode-switch{display:grid;grid-template-columns:1fr 1fr;margin-top:24px;background:#102833;padding:7px;border-radius:999px}
+.mode-switch button{border:0;padding:17px;border-radius:999px;background:transparent;color:white;font-size:20px;font-weight:800}
+.mode-switch button.active{background:#4f7082}
+.auto-settings{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.auto-settings input,.auto-settings select{padding:13px;background:#102d39;border:1px solid var(--border);color:white;border-radius:9px}
+.bottom-tools{display:flex;gap:18px;align-items:center;padding:24px 34px;background:#173441}
+.bottom-tools button{border:0;background:transparent;color:#bcd0d9;font-size:25px}
+.bottom-tools .fairness{margin-left:auto;background:#4f7082;padding:15px 20px;border-radius:12px;color:white;font-size:20px;font-weight:700}
+.history-card{margin:18px 28px;padding:20px;background:#173441;border-radius:14px}
+.history-title{display:flex;justify-content:space-between;align-items:center}
+.history-title h2{margin:0}
+.history-title button{border:0;background:#456474;color:white;padding:10px 14px;border-radius:8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+.stats div{background:#102d39;padding:13px;border-radius:9px;display:grid;gap:4px}
+.stats span{color:var(--muted);font-size:12px}
+.history-list{display:flex;gap:8px;overflow-x:auto}
+.history-item{padding:8px 11px;border-radius:999px;background:#3d5a69;direction:ltr;font-weight:800}
+.history-item.win{color:var(--green)}
+.history-item.lose{color:var(--red)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:20px;z-index:10}
+.modal-card{width:min(520px,100%);background:#173441;padding:25px;border-radius:14px;position:relative}
+.modal-card code{display:block;word-break:break-all;background:#102d39;padding:14px;border-radius:8px;margin-top:8px}
+.close{position:absolute;right:15px;top:12px;background:transparent;border:0;color:white;font-size:28px}
+.hash-label{color:var(--muted);margin-top:16px}
+.hidden{display:none!important}
+.notice{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+@media(max-width:640px){
+  .site-header{height:78px;padding:12px}
+  .brand{font-size:34px}
+  .wallet{font-size:16px;padding:14px}
+  .wallet-btn{padding:14px}
+  .game-shell,.history-card{margin-left:10px;margin-right:10px}
+  .game-panel{padding:24px 18px 30px}
+  .recent-chip{min-width:96px;padding:14px 10px;font-size:16px}
+  .main-result{font-size:68px}
+  .target-card{grid-template-columns:1fr 1fr;padding:18px 14px;gap:10px}
+  label{font-size:14px}
+  .target-input-wrap input,.chance-box input{font-size:18px;padding:14px}
+  .money-row{grid-template-columns:1fr 62px 62px 72px}
+  .money-row button{font-size:17px}
+  .auto-settings{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
