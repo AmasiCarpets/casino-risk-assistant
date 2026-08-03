@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Limbo 10 Boards</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">10X</div>
+        <div>
+          <h1>Limbo Multi</h1>
+          <p>عشر لوحات مستقلة بنقاط افتراضية</p>
+        </div>
+      </div>
+
+      <div class="balance-card">
+        <span>الرصيد الافتراضي</span>
+        <strong><span id="balance">1,000,000.00</span> نقطة</strong>
+      </div>
+    </header>
+
+    <section class="control-card">
+      <label>
+        مبلغ الرهان لكل لوحة
+        <div class="input-row">
+          <input id="betAmount" type="number" min="0.01" step="0.01" value="100" />
+          <button id="halfBtn" type="button">½</button>
+          <button id="doubleBtn" type="button">2×</button>
+        </div>
+      </label>
+
+      <label>
+        المضاعف المستهدف
+        <input id="target" type="number" min="1.01" max="1000000" step="0.01" value="2.00" />
+      </label>
+
+      <div class="summary">
+        <div>
+          <span>تكلفة الجولة الكاملة</span>
+          <strong id="totalCost">1,000.00</strong>
+        </div>
+        <div>
+          <span>فرصة الفوز لكل لوحة</span>
+          <strong id="chance">49.5000%</strong>
+        </div>
+        <div>
+          <span>ربح اللوحة عند الفوز</span>
+          <strong id="profitPerBoard">100.00</strong>
+        </div>
+      </div>
+
+      <button id="betBtn" class="bet-btn" type="button">BET × 10</button>
+
+      <div class="actions">
+        <button id="resetBalance" type="button">إعادة الرصيد</button>
+        <button id="resetStats" type="button">تصفير النتائج</button>
+      </div>
+    </section>
+
+    <section id="boards" class="boards"></section>
+
+    <section class="stats-card">
+      <div><span>إجمالي اللوحات المشغلة</span><strong id="roundsStat">0</strong></div>
+      <div><span>مرات الفوز</span><strong id="winsStat">0</strong></div>
+      <div><span>مرات الخسارة</span><strong id="lossesStat">0</strong></div>
+      <div><span>صافي الربح</span><strong id="netStat">0.00</strong></div>
+    </section>
+
+    <p class="notice">
+      محاكاة تعليمية بنقاط افتراضية فقط، بدون إيداع أو سحب أو أموال حقيقية.
+    </p>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
