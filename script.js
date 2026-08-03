@@ -1,160 +1,218 @@
+const BOARD_COUNT = 10;
 const HOUSE_EDGE = 0.01;
-const START_BALANCE = 1_000_000;
+const STARTING_BALANCE = 1_000_000;
 
 const $ = id => document.getElementById(id);
 
-let balance = START_BALANCE;
-let autoMode = false;
-let autoRunning = false;
-let stats = { rounds:0, wins:0, losses:0, net:0 };
-let nonce = 0;
+const boardsContainer = $("boards");
+const betAmountEl = $("betAmount");
+const targetEl = $("target");
+const betBtn = $("betBtn");
 
-const wallet = $("wallet");
-const targetInput = $("targetInput");
-const chanceInput = $("chanceInput");
-const betInput = $("betInput");
-const profitValue = $("profitValue");
-const mainResult = $("mainResult");
-const recentResults = $("recentResults");
-const historyList = $("historyList");
-const betButton = $("betButton");
-const roundHash = $("roundHash");
+let balance = STARTING_BALANCE;
+let playing = false;
+let stats = { rounds: 0, wins: 0, losses: 0, net: 0 };
 
-function fmt(n){
-  return Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const boards = Array.from({ length: BOARD_COUNT }, (_, index) => ({
+  id: index + 1,
+  clientSeed: crypto.randomUUID(),
+  serverSeed: crypto.randomUUID(),
+  nonce: 0,
+  result: 1
+}));
+
+function money(value) {
+  return Number(value).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 }
 
-function secureRandom(){
-  const a = new Uint32Array(2);
-  crypto.getRandomValues(a);
-  return (a[0] * 2**21 + (a[1]>>>11)) / 2**53;
+function shortSeed(seed) {
+  return `${seed.slice(0, 6)}…${seed.slice(-4)}`;
 }
 
-function multiplierFromRandom(r){
-  return Math.max(1, Math.floor(((1-HOUSE_EDGE)/Math.max(1-r,Number.EPSILON))*100)/100);
+function secureRandom() {
+  const values = new Uint32Array(2);
+  crypto.getRandomValues(values);
+  const high = values[0] * 2 ** 21;
+  const low = values[1] >>> 11;
+  return (high + low) / 2 ** 53;
 }
 
-async function sha256(text){
+async function sha256(text) {
   const data = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest("SHA-256",data);
-  return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("");
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(digest)]
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
-function update(){
-  const target = Math.max(Number(targetInput.value)||2,1.01);
-  const bet = Math.max(Number(betInput.value)||0,0);
-  chanceInput.value = (((1-HOUSE_EDGE)/target)*100).toFixed(8);
-  profitValue.textContent = fmt(bet*target-bet);
-  wallet.textContent = fmt(balance);
-  $("rounds").textContent = stats.rounds;
-  $("wins").textContent = stats.wins;
-  $("losses").textContent = stats.losses;
-  $("net").textContent = fmt(stats.net);
+function multiplierFromRandom(randomValue) {
+  const raw = (1 - HOUSE_EDGE) / Math.max(1 - randomValue, Number.EPSILON);
+  return Math.max(1, Math.floor(raw * 100) / 100);
 }
 
-function addResult(value, won){
-  const chip = document.createElement("div");
-  chip.className = `recent-chip ${won?"win":""}`;
-  chip.textContent = `${value.toFixed(2)}×`;
-  recentResults.prepend(chip);
-  while(recentResults.children.length>5) recentResults.lastElementChild.remove();
+function createBoards() {
+  boardsContainer.innerHTML = "";
 
-  const item = document.createElement("div");
-  item.className = `history-item ${won?"win":"lose"}`;
-  item.textContent = `${value.toFixed(2)}×`;
-  historyList.prepend(item);
-  while(historyList.children.length>100) historyList.lastElementChild.remove();
+  boards.forEach(board => {
+    const element = document.createElement("article");
+    element.className = "board";
+    element.id = `board-${board.id}`;
+    element.innerHTML = `
+      <div class="board-head">
+        <span class="board-number">لوحة ${board.id}</span>
+        <span class="board-status" id="status-${board.id}">جاهزة</span>
+      </div>
+
+      <div class="board-result" id="result-${board.id}">1.00×</div>
+
+      <div class="board-details">
+        <div><span>Client</span><code id="client-${board.id}">${shortSeed(board.clientSeed)}</code></div>
+        <div><span>Server</span><code id="server-${board.id}">${shortSeed(board.serverSeed)}</code></div>
+        <div><span>Nonce</span><code id="nonce-${board.id}">0</code></div>
+        <div><span>Hash</span><code id="hash-${board.id}">—</code></div>
+      </div>
+    `;
+    boardsContainer.appendChild(element);
+  });
 }
 
-async function playRound(){
-  const bet = Number(betInput.value);
-  const target = Number(targetInput.value);
+function updateUi() {
+  const bet = Math.max(Number(betAmountEl.value) || 0, 0);
+  const target = Math.max(Number(targetEl.value) || 1.01, 1.01);
 
-  if(!Number.isFinite(bet)||bet<=0){
-    mainResult.textContent="0.00×";
-    mainResult.className="main-result lose";
-    return false;
+  $("balance").textContent = money(balance);
+  $("totalCost").textContent = money(bet * BOARD_COUNT);
+  $("chance").textContent = `${(((1 - HOUSE_EDGE) / target) * 100).toFixed(4)}%`;
+  $("profitPerBoard").textContent = money(bet * target - bet);
+
+  $("roundsStat").textContent = stats.rounds;
+  $("winsStat").textContent = stats.wins;
+  $("lossesStat").textContent = stats.losses;
+  $("netStat").textContent = money(stats.net);
+}
+
+async function generateBoardResult(board, bet, target) {
+  board.nonce += 1;
+  board.serverSeed = crypto.randomUUID();
+
+  // كل لوحة تستخدم مصدر عشوائية مستقل مع Seeds وNonce منفصلة.
+  const randomValue = secureRandom();
+  const proofInput =
+    `${board.serverSeed}:${board.clientSeed}:${board.nonce}:${randomValue}`;
+  const hash = await sha256(proofInput);
+  const result = multiplierFromRandom(randomValue);
+  const won = result >= target;
+
+  return { result, won, hash };
+}
+
+async function playAllBoards() {
+  if (playing) return;
+
+  const bet = Number(betAmountEl.value);
+  const target = Number(targetEl.value);
+  const totalCost = bet * BOARD_COUNT;
+
+  if (!Number.isFinite(bet) || bet <= 0) {
+    alert("اكتب مبلغ رهان صحيحاً أكبر من صفر.");
+    return;
   }
-  if(bet>balance) return false;
 
-  balance -= bet;
-  stats.net -= bet;
-  update();
-
-  nonce++;
-  const random = secureRandom();
-  const result = multiplierFromRandom(random);
-  const won = result>=target;
-
-  mainResult.textContent = `${result.toFixed(2)}×`;
-  mainResult.className = `main-result ${won?"win":"lose"}`;
-
-  if(won){
-    const payout = bet*target;
-    balance += payout;
-    stats.net += payout;
-    stats.wins++;
-  }else{
-    stats.losses++;
+  if (!Number.isFinite(target) || target < 1.01) {
+    alert("المضاعف المستهدف يجب أن يكون 1.01× أو أكثر.");
+    return;
   }
 
-  stats.rounds++;
-  roundHash.textContent = await sha256(`${nonce}:${random}:${result}`);
-  addResult(result,won);
-  update();
-  return true;
-}
+  if (totalCost > balance) {
+    alert(`تحتاج ${money(totalCost)} نقطة لتشغيل اللوحات العشر.`);
+    return;
+  }
 
-betButton.addEventListener("click", async()=>{
-  if(autoMode){
-    if(autoRunning){
-      autoRunning=false;
-      betButton.textContent="Start Auto";
-      return;
+  playing = true;
+  betBtn.disabled = true;
+  balance -= totalCost;
+  stats.net -= totalCost;
+  updateUi();
+
+  boards.forEach(board => {
+    const card = $(`board-${board.id}`);
+    card.className = "board running";
+    $(`status-${board.id}`).textContent = "تلعب…";
+    $(`result-${board.id}`).textContent = "—";
+  });
+
+  // تشغيل جميع اللوحات في نفس اللحظة، لكن كل واحدة بحساب مستقل.
+  const generated = await Promise.all(
+    boards.map(board => generateBoardResult(board, bet, target))
+  );
+
+  await new Promise(resolve => setTimeout(resolve, 550));
+
+  generated.forEach((outcome, index) => {
+    const board = boards[index];
+    const card = $(`board-${board.id}`);
+
+    board.result = outcome.result;
+    card.className = `board ${outcome.won ? "win" : "lose"}`;
+    $(`result-${board.id}`).textContent = `${outcome.result.toFixed(2)}×`;
+    $(`status-${board.id}`).textContent = outcome.won ? "فوز" : "خسارة";
+    $(`server-${board.id}`).textContent = shortSeed(board.serverSeed);
+    $(`nonce-${board.id}`).textContent = board.nonce;
+    $(`hash-${board.id}`).textContent = `${outcome.hash.slice(0, 8)}…`;
+
+    stats.rounds += 1;
+
+    if (outcome.won) {
+      const payout = bet * target;
+      balance += payout;
+      stats.net += payout;
+      stats.wins += 1;
+    } else {
+      stats.losses += 1;
     }
-    autoRunning=true;
-    betButton.textContent="Stop Auto";
-    const count=Math.min(Math.max(Number($("autoCount").value)||1,1),1000);
-    const speed=Number($("autoSpeed").value)||900;
-    for(let i=0;i<count&&autoRunning;i++){
-      const ok=await playRound();
-      if(!ok) break;
-      await new Promise(r=>setTimeout(r,speed));
-    }
-    autoRunning=false;
-    betButton.textContent="Start Auto";
-  }else{
-    await playRound();
-  }
+  });
+
+  updateUi();
+  playing = false;
+  betBtn.disabled = false;
+}
+
+betBtn.addEventListener("click", playAllBoards);
+betAmountEl.addEventListener("input", updateUi);
+targetEl.addEventListener("input", updateUi);
+
+$("halfBtn").addEventListener("click", () => {
+  betAmountEl.value = Math.max((Number(betAmountEl.value) || 0) / 2, 0.01).toFixed(2);
+  updateUi();
 });
 
-targetInput.addEventListener("input",update);
-betInput.addEventListener("input",update);
+$("doubleBtn").addEventListener("click", () => {
+  const maxPerBoard = balance / BOARD_COUNT;
+  betAmountEl.value = Math.min((Number(betAmountEl.value) || 0) * 2, maxPerBoard).toFixed(2);
+  updateUi();
+});
 
-$("halfBtn").onclick=()=>{betInput.value=Math.max((Number(betInput.value)||0)/2,.01).toFixed(2);update()};
-$("doubleBtn").onclick=()=>{betInput.value=Math.min((Number(betInput.value)||0)*2,balance).toFixed(2);update()};
-$("maxBtn").onclick=()=>{betInput.value=balance.toFixed(2);update()};
-$("clearTarget").onclick=()=>{targetInput.value="2.00";update()};
+$("resetBalance").addEventListener("click", () => {
+  balance = STARTING_BALANCE;
+  updateUi();
+});
 
-$("manualMode").onclick=()=>{
-  autoMode=false;
-  $("manualMode").classList.add("active");
-  $("autoMode").classList.remove("active");
-  $("autoSettings").classList.add("hidden");
-  betButton.textContent="Bet";
-};
+$("resetStats").addEventListener("click", () => {
+  stats = { rounds: 0, wins: 0, losses: 0, net: 0 };
 
-$("autoMode").onclick=()=>{
-  autoMode=true;
-  $("autoMode").classList.add("active");
-  $("manualMode").classList.remove("active");
-  $("autoSettings").classList.remove("hidden");
-  betButton.textContent="Start Auto";
-};
+  boards.forEach(board => {
+    board.clientSeed = crypto.randomUUID();
+    board.serverSeed = crypto.randomUUID();
+    board.nonce = 0;
+    board.result = 1;
+  });
 
-$("fairnessBtn").onclick=()=>$("fairnessModal").classList.remove("hidden");
-$("closeFairness").onclick=()=>$("fairnessModal").classList.add("hidden");
-$("resetBalance").onclick=()=>{balance=START_BALANCE;update()};
+  createBoards();
+  updateUi();
+});
 
-[1632.05,1.43,1.09,3.84,5.89].forEach((v,i)=>addResult(v,i===0));
-update();
+createBoards();
+updateUi();
