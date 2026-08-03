@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Limbo 1000 Boards</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#07141c;--panel:#102733;--panel2:#173746;--panel3:#0b1e28;
+  --border:#2b5365;--text:#f5fbff;--muted:#9eb6c2;
+  --green:#00e701;--red:#ff4d63
+}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif}
+button,input{font:inherit}
+button{cursor:pointer}
+.app{width:min(1500px,calc(100% - 10px));margin:6px auto 30px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.brand{display:flex;align-items:center;gap:9px}
+.logo{width:50px;height:50px;border-radius:13px;display:grid;place-items:center;background:var(--green);color:#063206;font-weight:900;font-size:17px}
+.brand h1{margin:0;font-size:24px}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:11px}
+.balance{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:10px 13px;display:grid;gap:3px;min-width:220px}
+.balance span{color:var(--muted);font-size:11px}
+.balance strong{direction:ltr;text-align:right;font-size:18px}
+.controls{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:11px;display:grid;grid-template-columns:1fr 1fr;gap:9px;position:sticky;top:4px;z-index:3}
+label{display:grid;gap:5px;color:#d0dde4;font-size:12px}
+input{width:100%;background:var(--panel3);color:white;border:1px solid var(--border);border-radius:8px;padding:10px;outline:none;direction:ltr;text-align:right}
+.row{display:flex;background:var(--panel3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.row input{border:0;border-radius:0}
+.row button{min-width:44px;border:0;border-right:1px solid var(--border);background:var(--panel2);color:white}
+.summary{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.summary div,.stats div{background:var(--panel3);border:1px solid var(--border);border-radius:8px;padding:8px;display:grid;gap:3px}
+.summary span,.stats span{font-size:9px;color:var(--muted)}
+.summary strong,.stats strong{direction:ltr;font-size:14px}
+.bet{grid-column:1/-1;border:0;border-radius:10px;background:var(--green);color:#073207;font-size:17px;font-weight:900;padding:13px}
+.bet:disabled{opacity:.55}
+.secondary{grid-column:1/-1;display:flex;justify-content:center;gap:6px}
+.secondary button{border:1px solid var(--border);background:var(--panel2);color:white;border-radius:7px;padding:7px 10px;font-size:11px}
+.boards-wrap{margin-top:8px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:6px}
+.boards{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(56px,1fr));
+  gap:3px;
+  max-height:68vh;
+  overflow:auto;
+  content-visibility:auto;
+}
+.board{
+  min-height:48px;background:var(--panel3);border:1px solid #214352;border-radius:5px;
+  padding:3px;display:grid;align-content:center;justify-items:center;gap:1px;
+  transition:border-color .12s,background .12s
+}
+.board .num{font-size:7px;color:var(--muted)}
+.board .result{font-size:12px;font-weight:900;direction:ltr}
+.board .nonce{font-size:6px;color:#6f8995}
+.board.win{border-color:var(--green);background:rgba(0,231,1,.08)}
+.board.win .result{color:var(--green)}
+.board.lose{border-color:var(--red);background:rgba(255,77,99,.06)}
+.board.lose .result{color:var(--red)}
+.board.running .result{color:#d9e7ee}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:8px}
+.note{text-align:center;color:var(--muted);font-size:10px;line-height:1.5;margin-top:8px}
+@media(max-width:620px){
+  .app{width:min(100% - 4px,1500px);margin-top:2px}
+  .header{flex-direction:column;align-items:stretch}
+  .balance{min-width:0}
+  .controls{grid-template-columns:1fr;padding:8px;top:2px}
+  .summary{grid-template-columns:1fr 1fr 1fr}
+  .boards{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:2px;max-height:62vh}
+  .board{min-height:42px;padding:2px}
+  .board .result{font-size:10px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="header">
+  <div class="brand">
+    <div class="logo">1000X</div>
+    <div><h1>Limbo Mega</h1><p>ألف لوحة صغيرة مستقلة</p></div>
+  </div>
+  <div class="balance"><span>الرصيد الافتراضي</span><strong><span id="balance">10,000,000.00</span> نقطة</strong></div>
+</header>
+
+<section class="controls">
+  <label>مبلغ الرهان لكل لوحة
+    <div class="row">
+      <input id="betAmount" type="number" min="0.01" step="0.01" value="10">
+      <button id="half">½</button>
+      <button id="double">2×</button>
+    </div>
+  </label>
+
+  <label>المضاعف المستهدف
+    <input id="target" type="number" min="1.01" max="1000000" step="0.01" value="2.00">
+  </label>
+
+  <div class="summary">
+    <div><span>تكلفة تشغيل الألف</span><strong id="cost">10,000.00</strong></div>
+    <div><span>فرصة الفوز لكل لوحة</span><strong id="chance">49.5000%</strong></div>
+    <div><span>صافي ربح اللوحة الفائزة</span><strong id="profit">10.00</strong></div>
+  </div>
+
+  <button id="betBtn" class="bet">BET × 1000</button>
+
+  <div class="secondary">
+    <button id="resetBalance">إعادة الرصيد</button>
+    <button id="resetAll">تصفير الكل</button>
+  </div>
+</section>
+
+<section class="boards-wrap">
+  <div id="boards" class="boards"></div>
+</section>
+
+<section class="stats">
+  <div><span>اللوحات المشغلة</span><strong id="rounds">0</strong></div>
+  <div><span>الفوز</span><strong id="wins">0</strong></div>
+  <div><span>الخسارة</span><strong id="losses">0</strong></div>
+  <div><span>صافي الربح</span><strong id="net">0.00</strong></div>
+</section>
+
+<p class="note">نسخة محاكاة بنقاط افتراضية فقط. تشغيل 1000 لوحة قد يكون أثقل على بعض الجوالات القديمة.</p>
+</main>
+
+<script>
+const COUNT=1000, EDGE=.01, START=10000000;
+const $=id=>document.getElementById(id);
+
+let balance=START, busy=false;
+let stats={rounds:0,wins:0,losses:0,net:0};
+
+const boards=Array.from({length:COUNT},(_,i)=>({
+  id:i+1,
+  nonce:0,
+  clientSeed:crypto.randomUUID()
+}));
+
+function money(n){
+  return Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function random01(){
+  const a=new Uint32Array(2);
+  crypto.getRandomValues(a);
+  return (a[0]*2**21+(a[1]>>>11))/2**53;
+}
+function mult(r){
+  return Math.max(1,Math.floor(((1-EDGE)/Math.max(1-r,Number.EPSILON))*100)/100);
+}
+function render(){
+  const frag=document.createDocumentFragment();
+  boards.forEach(b=>{
+    const el=document.createElement("div");
+    el.className="board";
+    el.id="b"+b.id;
+    el.innerHTML=`<div class="num">#${b.id}</div><div class="result" id="r${b.id}">1.00×</div><div class="nonce" id="n${b.id}">N0</div>`;
+    frag.appendChild(el);
+  });
+  $("boards").replaceChildren(frag);
+}
+function update(){
+  const bet=Math.max(Number($("betAmount").value)||0,0);
+  const target=Math.max(Number($("target").value)||1.01,1.01);
+  $("balance").textContent=money(balance);
+  $("cost").textContent=money(bet*COUNT);
+  $("chance").textContent=(((1-EDGE)/target)*100).toFixed(4)+"%";
+  $("profit").textContent=money(bet*target-bet);
+  $("rounds").textContent=stats.rounds;
+  $("wins").textContent=stats.wins;
+  $("losses").textContent=stats.losses;
+  $("net").textContent=money(stats.net);
+}
+
+async function play(){
+  if(busy)return;
+
+  const bet=Number($("betAmount").value);
+  const target=Number($("target").value);
+  const cost=bet*COUNT;
+
+  if(!Number.isFinite(bet)||bet<=0){
+    alert("اكتب مبلغاً صحيحاً أكبر من صفر");
+    return;
+  }
+  if(!Number.isFinite(target)||target<1.01){
+    alert("المضاعف يجب أن يكون 1.01 أو أكثر");
+    return;
+  }
+  if(cost>balance){
+    alert("الرصيد غير كافٍ لتشغيل ألف لوحة");
+    return;
+  }
+
+  busy=true;
+  $("betBtn").disabled=true;
+  balance-=cost;
+  stats.net-=cost;
+  update();
+
+  for(let i=0;i<COUNT;i++){
+    const b=boards[i];
+    const el=$("b"+b.id);
+    el.className="board running";
+    $("r"+b.id).textContent="—";
+  }
+
+  await new Promise(requestAnimationFrame);
+
+  const results=new Array(COUNT);
+  for(let i=0;i<COUNT;i++){
+    const b=boards[i];
+    b.nonce++;
+    const result=mult(random01());
+    results[i]={result,won:result>=target};
+  }
+
+  await new Promise(resolve=>setTimeout(resolve,180));
+
+  const chunk=100;
+  for(let start=0;start<COUNT;start+=chunk){
+    const end=Math.min(start+chunk,COUNT);
+
+    for(let i=start;i<end;i++){
+      const b=boards[i], out=results[i];
+      const el=$("b"+b.id);
+
+      el.className="board "+(out.won?"win":"lose");
+      $("r"+b.id).textContent=out.result.toFixed(2)+"×";
+      $("n"+b.id).textContent="N"+b.nonce;
+
+      stats.rounds++;
+      if(out.won){
+        const payout=bet*target;
+        balance+=payout;
+        stats.net+=payout;
+        stats.wins++;
+      }else{
+        stats.losses++;
+      }
+    }
+
+    update();
+    await new Promise(requestAnimationFrame);
+  }
+
+  busy=false;
+  $("betBtn").disabled=false;
+}
+
+$("betBtn").onclick=play;
+$("betAmount").oninput=update;
+$("target").oninput=update;
+
+$("half").onclick=()=>{
+  $("betAmount").value=Math.max((Number($("betAmount").value)||0)/2,.01).toFixed(2);
+  update();
+};
+$("double").onclick=()=>{
+  $("betAmount").value=Math.min((Number($("betAmount").value)||0)*2,balance/COUNT).toFixed(2);
+  update();
+};
+$("resetBalance").onclick=()=>{
+  balance=START;
+  update();
+};
+$("resetAll").onclick=()=>{
+  balance=START;
+  stats={rounds:0,wins:0,losses:0,net:0};
+  boards.forEach(b=>b.nonce=0);
+  render();
+  update();
+};
+
+render();
+update();
+</script>
+</body>
+</html>
