@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Limbo Provably Fair — 10,000 لوحة</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Limbo Provably Fair</h1>
+      <p>نسخة تجريبية بـ 10,000 نتيجة قابلة للتحقق</p>
+    </div>
+    <div class="status">
+      <span id="serverStatus" class="badge">جاري الاتصال…</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel controls">
+      <div class="field wide">
+        <label for="clientSeed">Client Seed</label>
+        <input id="clientSeed" type="text" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <label for="target">المضاعف المستهدف</label>
+        <input id="target" type="number" min="1.01" step="0.01" value="2.00" />
+      </div>
+
+      <div class="field">
+        <label>فرصة الفوز التقريبية</label>
+        <div id="winChance" class="metric">49.50%</div>
+      </div>
+
+      <button id="betBtn" class="primary">BET × 10,000</button>
+      <button id="rotateBtn" class="secondary">كشف وتغيير Server Seed</button>
+    </section>
+
+    <section class="panel seed-panel">
+      <div class="seed-row">
+        <span>Server Seed Hash الحالي</span>
+        <code id="serverHash">—</code>
+      </div>
+      <div class="seed-row">
+        <span>Nonce البداية</span>
+        <code id="startNonce">0</code>
+      </div>
+      <div class="seed-row">
+        <span>آخر Server Seed مكشوف</span>
+        <code id="revealedSeed">لم يتم الكشف بعد</code>
+      </div>
+    </section>
+
+    <section class="panel stats">
+      <div><span>الفائز</span><strong id="wins">0</strong></div>
+      <div><span>الخاسر</span><strong id="losses">0</strong></div>
+      <div><span>أعلى مضاعف</span><strong id="maxMult">0.00×</strong></div>
+      <div><span>المتوسط</span><strong id="avgMult">0.00×</strong></div>
+    </section>
+
+    <section class="panel board-wrap">
+      <div class="board-toolbar">
+        <h2>النتائج</h2>
+        <div class="legend">
+          <span class="win-dot"></span> فائز
+          <span class="lose-dot"></span> خاسر
+        </div>
+      </div>
+      <canvas id="board" width="1400" height="900" aria-label="لوحة نتائج Limbo"></canvas>
+      <p class="hint">اضغط على أي مربع لعرض تفاصيله.</p>
+    </section>
+
+    <section class="panel detail" id="detailPanel">
+      <h2>تفاصيل النتيجة</h2>
+      <div class="detail-grid">
+        <div><span>رقم اللوحة</span><code id="dIndex">—</code></div>
+        <div><span>Nonce</span><code id="dNonce">—</code></div>
+        <div><span>المضاعف</span><code id="dMultiplier">—</code></div>
+        <div><span>النتيجة</span><code id="dOutcome">—</code></div>
+        <div class="full"><span>HMAC-SHA256</span><code id="dHmac">—</code></div>
+      </div>
+    </section>
+
+    <section class="panel verify">
+      <h2>التحقق من جولة قديمة</h2>
+      <p>بعد الضغط على «كشف وتغيير Server Seed» انسخ القيم القديمة هنا للتحقق.</p>
+      <div class="verify-grid">
+        <input id="vServerSeed" placeholder="Server Seed المكشوف" />
+        <input id="vClientSeed" placeholder="Client Seed" />
+        <input id="vNonce" type="number" placeholder="Nonce" />
+        <button id="verifyBtn" class="secondary">تحقق</button>
+      </div>
+      <pre id="verifyResult">—</pre>
+    </section>
+  </main>
+
+  <footer>
+    هذه نسخة تعليمية ومحاكاة فقط، وليست مرتبطة بـ Stake ولا تتنبأ بنتائجه.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
